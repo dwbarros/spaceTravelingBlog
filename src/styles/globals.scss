@@ -1,7 +1,44 @@
+:root {
+  --background: #1A1D23;
+  --highlight: #FF57B2;
+  --colorFont-title: #F8F8F8;
+  --colorFont-info: #BBBBBB;
+  --colorFont-body: #D7D7D7;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
-// TODO
+body {
+  background-color: var(--background);
+  color:var(--colorFont-body)
+}
+
+body, input, textarea, select, button {
+  font: 400 1rem "Inter", sans-serif;
+}
+
+button {
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+
+@media (max-width: 1080px) {
+  html {
+      font-size: 93.75%;
+  }
+}
+
+@media (max-width: 720px) {
+  html {
+      font-size: 87.5%;
+  }
+}
