@@ -1,5 +1,33 @@
-.container {
-    h1 {
-        color: red;
+.postList {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 0 5rem;
+}
+
+.postItem {
+    .title {
+        color: var(--colorFont-title);
+        margin-bottom: .5rem;
+    }   
+
+    .info {
+        margin-top: 1rem;
     }
+
+    svg {
+        margin-right: .5rem;
+    }
+
+    .createdAt {
+        margin-right: 1rem;
+    }
+
+    & + .postItem {
+        margin-top: 3rem;
+    }
+
+    &:hover .title {
+        color: var(--highlight)
+    } 
+
 }
