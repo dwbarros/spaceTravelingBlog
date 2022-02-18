@@ -1,17 +1,12 @@
+import { MouseEvent, useState } from 'react';
+import { FiCalendar, FiUser } from 'react-icons/fi';
 import { GetStaticProps } from 'next';
 import Head from 'next/head';
 import Link from 'next/link';
-
-import { FiCalendar, FiUser } from 'react-icons/fi';
-
 import { getPrismicClient } from '../services/prismic';
 import Prismic from '@prismicio/client';
-
 import commonStyles from '../styles/common.module.scss';
 import styles from './home.module.scss';
-import { MouseEvent, useEffect, useState } from 'react';
-import { ApiData } from '@prismicio/client/types/ResolvedApi';
-import { ApiOptions } from '@prismicio/client/types/Api';
 
 
 interface Post {
@@ -37,24 +32,23 @@ interface HomeProps {
 export default function Home({ postsPagination }: HomeProps) {
 
   const [posts, setPosts] = useState<Post[]>(postsPagination.results);
+  const [nextPage, setNextPage] = useState<string>(postsPagination.next_page);
 
-
+  
   function handleNextPage(event: MouseEvent) {
     event.preventDefault();
 
-    fetch(postsPagination.next_page, {
-      method: 'GET',
-      mode: 'cors',
-      cache: 'default'
-    })
+    fetch(nextPage)
       .then(response => response.json())
       .then(data => updatePosts(data))
-      .catch(err => console.log(err))
+      .catch(err => {
+        alert('Erro ao tentar buscar dados');
+        console.log(err);
+      });
   }
 
-  function updatePosts(data: any) {
-    console.log(data)
-    const newPosts = data.results.map((post) => {
+  function updatePosts(data: PostPagination) {
+    const newPosts = data.results.map((post: Post) => {
       return {
         uid: post.uid,
         first_publication_date: new Date(post.first_publication_date).toLocaleDateString('pt-BR', {
@@ -69,10 +63,11 @@ export default function Home({ postsPagination }: HomeProps) {
         }
       }
     });
-    const postList = [...posts, newPosts];
-    setPosts( postList );
+
+    setPosts([...posts, ...newPosts]);
+    setNextPage(data.next_page);
   }
-  
+
 
   return (
     <>
@@ -103,12 +98,15 @@ export default function Home({ postsPagination }: HomeProps) {
             </li>
           ))}
         </ul>
-        <button
-          className={styles.bntMorePosts}
-          onClick={handleNextPage}
-        >
-          Carregar mais posts
-        </button>
+        {nextPage
+          ? <button
+            className={styles.bntMorePosts}
+            onClick={handleNextPage}
+            >
+              Carregar mais posts
+            </button>
+          : null
+        }
       </main>
     </>
   )
@@ -146,10 +144,9 @@ export const getStaticProps: GetStaticProps = async () => {
     results: posts
   };
 
-
   return {
     props: {
       postsPagination,
     }
   }
-};
+}
