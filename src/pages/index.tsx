@@ -122,7 +122,7 @@ export const getStaticProps: GetStaticProps = async () => {
   ], {
     pageSize: 2,
   });
-
+  
   const posts = postsResponse.results.map<Post>(post => {
     return {
       uid: post.uid,
