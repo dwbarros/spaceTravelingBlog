@@ -35,10 +35,10 @@ export default function Home({ postsPagination }: HomeProps) {
   const [nextPage, setNextPage] = useState<string>(postsPagination.next_page);
 
   
-  function handleNextPage(event: MouseEvent) {
+  async function handleNextPage(event: MouseEvent) {
     event.preventDefault();
 
-    fetch(nextPage)
+    await fetch(nextPage)
       .then(response => response.json())
       .then(data => updatePosts(data))
       .catch(err => {
@@ -117,10 +117,10 @@ export const getStaticProps: GetStaticProps = async () => {
 
   const prismic = getPrismicClient();
 
-  const postsResponse = await prismic.query([
+  const postsResponse = await prismic.query<any>([
     Prismic.predicates.at('document.type', 'post')
   ], {
-    pageSize: 2,
+    pageSize: 4,
   });
   
   const posts = postsResponse.results.map<Post>(post => {
