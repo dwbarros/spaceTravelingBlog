@@ -75,7 +75,7 @@ export default function Home({ postsPagination }: HomeProps) {
         <title>spaceTraveling</title>
       </Head>
 
-      <main className={commonStyles.container}>
+      <main className={`${styles.posts} ${commonStyles.container}`}>
         <ul className={styles.postList}>
           {posts.map(post => (
             <li key={post.uid} className={styles.postItem}>
@@ -120,10 +120,10 @@ export const getStaticProps: GetStaticProps = async () => {
   const postsResponse = await prismic.query<any>([
     Prismic.predicates.at('document.type', 'post')
   ], {
-    pageSize: 4,
+    pageSize: 3,
   });
   
-  const posts = postsResponse.results.map<Post>(post => {
+  const posts = postsResponse.results.map(post => {
     return {
       uid: post.uid,
       first_publication_date: new Date(post.first_publication_date).toLocaleDateString('pt-BR', {

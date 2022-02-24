@@ -20,8 +20,10 @@ interface Post {
     };
     author: string;
     content: {
-      heading: string | null;
-      body: string;
+      heading: string;
+      body: {
+        text: string;
+      }[];
     }[];
   };
 }
@@ -38,32 +40,38 @@ export default function Post({ post }: PostProps) {
         <title>{post.data.title} | spaceTraveling</title>
       </Head>
 
-      <main className={commonStyles.container}>
-        <img src={post.data.banner.url} alt="banner"></img>
+      <main>
+        <section className={styles.highlights}>
+          <img src={post.data.banner.url} alt="banner"></img>
+        </section>
 
-        <h1>{post.data.title}</h1>
+        <article className={`${styles.content} ${commonStyles.container}`}>
+          <section className={styles.contentHeader}>
+            <h1>{post.data.title}</h1>
 
-        <div className={styles.info}>
-          <span className={styles.createdAt}>
-            <FiCalendar />
-            {post.first_publication_date}
-          </span>
+            <div className={styles.info}>
+              <span className={styles.createdAt}>
+                <FiCalendar />
+                {post.first_publication_date}
+              </span>
 
-          <span className={styles.author}>
-            <FiUser />
-            {post.data.author}
-          </span>
-        </div>
+              <span className={styles.author}>
+                <FiUser />
+                {post.data.author}
+              </span>
+            </div>
+          </section>
 
-        <article>
-          {post.data.content.map(content => {
-            return (
-              <div key={content.heading} >
-                <h2>{content.heading}</h2>
-                <div dangerouslySetInnerHTML={{ __html: content.body }} />
-              </div>
-            )
-          })}
+          <section className={styles.contentBody}>
+            {post.data.content.map(content => {
+              return (
+                <div key={content.heading} >
+                  <h2>{content.heading}</h2>
+                  <div dangerouslySetInnerHTML={{ __html: content.body }} />
+                </div>
+              )
+            })}
+          </section>
         </article>
       </main>
     </>
@@ -95,7 +103,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   const content = data.content.map(content => {
     return {
       heading: content.heading,
-      body: prismicH.asHTML(content.body),
+      body: prismicH.asHTML(content.body)
     }
   })
 

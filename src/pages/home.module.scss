@@ -1,3 +1,7 @@
+.posts {
+    padding: 0 5rem 3rem;
+}
+
 .postList {
     padding-top: 1rem;
 }
@@ -31,12 +35,19 @@
 
 .bntMorePosts {
     color: var(--highlight);
-    margin-top: 2rem;
+    margin: 2rem 0;
     font-weight: 600;
     background: none;
     border: none;
 
     &:hover {
         filter: brightness(0.8);
+    }
+}
+
+@media (max-width: 720px) {
+    .posts {
+        padding: 0 3rem 3rem;
+
     }
 }

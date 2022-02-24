@@ -1,1 +1,60 @@
-// TODO
+.highlights {
+    max-width: 1980px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    
+    img {
+        width: 100vw;
+        height: 50vh;
+        object-fit: cover;
+        object-position: center 33%;
+    }
+}
+
+.content {
+    padding: 3rem 5rem;
+
+    .contentHeader {
+    
+        h1 {
+            color: var(--colorFont-title);
+            font-size: 2rem;
+        }
+        
+        .info {
+            margin: 1rem 0;
+            color: var(--colorFont-info);
+        }
+    
+        svg {
+            margin-right: .5rem;
+        }
+    
+        .createdAt {
+            margin-right: 1rem;
+        }
+    }
+    
+    .contentBody {
+        margin-top: 3rem;
+    
+        h2 {
+            font-weight: bold;
+            color: var(--colorFont-title)
+        }
+    
+        p {
+            text-align: justify;
+            line-height: 2;
+            margin-bottom: 1rem;
+        }
+    }
+}
+
+@media (max-width: 720px) {
+    .content {
+        padding: 2rem 3rem;
+    }
+}
+
