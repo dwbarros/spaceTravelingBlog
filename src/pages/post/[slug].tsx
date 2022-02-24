@@ -5,7 +5,7 @@ import Head from "next/head";
 import { getPrismicClient } from '../../services/prismic';
 
 import Prismic from '@prismicio/client';
-import * as prismicH from '@prismicio/helpers';
+import { RichText } from "prismic-dom";
 
 import commonStyles from '../../styles/common.module.scss';
 import styles from './post.module.scss';
@@ -97,16 +97,16 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
   const prismic = getPrismicClient();
-  const response = await prismic.getByUID<any>('post', String(params.slug), {});
+  const response = await prismic.getByUID('post', String(params.slug), {});
   const data = response.data;
 
   const content = data.content.map(content => {
     return {
       heading: content.heading,
-      body: prismicH.asHTML(content.body)
+      body: RichText.asHtml(content.body)
     }
   })
-
+  
   const post = {
     first_publication_date: new Date(response.first_publication_date).toLocaleDateString('pt-BR', {
       day: '2-digit',
