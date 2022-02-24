@@ -1,10 +1,16 @@
 import { MouseEvent, useState } from 'react';
-import { FiCalendar, FiUser } from 'react-icons/fi';
+import { FiCalendar, FiClock, FiUser } from 'react-icons/fi';
+
 import { GetStaticProps } from 'next';
 import Head from 'next/head';
 import Link from 'next/link';
+
 import { getPrismicClient } from '../services/prismic';
 import Prismic from '@prismicio/client';
+
+import { format } from 'date-fns';
+import ptBR from 'date-fns/locale/pt-BR'
+;
 import commonStyles from '../styles/common.module.scss';
 import styles from './home.module.scss';
 
@@ -34,7 +40,7 @@ export default function Home({ postsPagination }: HomeProps) {
   const [posts, setPosts] = useState<Post[]>(postsPagination.results);
   const [nextPage, setNextPage] = useState<string>(postsPagination.next_page);
 
-  
+
   async function handleNextPage(event: MouseEvent) {
     event.preventDefault();
 
@@ -51,10 +57,8 @@ export default function Home({ postsPagination }: HomeProps) {
     const newPosts = data.results.map((post: Post) => {
       return {
         uid: post.uid,
-        first_publication_date: new Date(post.first_publication_date).toLocaleDateString('pt-BR', {
-          day: '2-digit',
-          month: 'short',
-          year: 'numeric'
+        first_publication_date: format(new Date(post.first_publication_date), 'dd MMM yyyy', {
+          locale: ptBR,
         }),
         data: {
           title: post.data.title,
@@ -85,14 +89,21 @@ export default function Home({ postsPagination }: HomeProps) {
                   <p>{post.data.subtitle}</p>
                 </a>
               </Link>
+
               <div className={styles.info}>
                 <span className={styles.createdAt}>
                   <FiCalendar />
                   {post.first_publication_date}
                 </span>
+
                 <span className={styles.author}>
                   <FiUser />
                   {post.data.author}
+                </span>
+
+                <span className={styles.readTime}>
+                  <FiClock />
+                  4 min
                 </span>
               </div>
             </li>
@@ -102,9 +113,9 @@ export default function Home({ postsPagination }: HomeProps) {
           ? <button
             className={styles.bntMorePosts}
             onClick={handleNextPage}
-            >
-              Carregar mais posts
-            </button>
+          >
+            Carregar mais posts
+          </button>
           : null
         }
       </main>
@@ -122,14 +133,12 @@ export const getStaticProps: GetStaticProps = async () => {
   ], {
     pageSize: 3,
   });
-  
+
   const posts = postsResponse.results.map(post => {
     return {
       uid: post.uid,
-      first_publication_date: new Date(post.first_publication_date).toLocaleDateString('pt-BR', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric'
+      first_publication_date: format(new Date(post.first_publication_date), 'dd MMM yyyy', {
+        locale: ptBR,
       }),
       data: {
         title: post.data.title,

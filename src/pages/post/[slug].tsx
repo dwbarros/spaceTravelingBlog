@@ -1,4 +1,4 @@
-import { FiCalendar, FiUser } from 'react-icons/fi';
+import { FiCalendar, FiClock, FiUser } from 'react-icons/fi';
 
 import { GetStaticPaths, GetStaticProps } from 'next';
 import Head from "next/head";
@@ -6,6 +6,9 @@ import { getPrismicClient } from '../../services/prismic';
 
 import Prismic from '@prismicio/client';
 import { RichText } from "prismic-dom";
+
+import { format } from 'date-fns';
+import ptBR from 'date-fns/locale/pt-BR';
 
 import commonStyles from '../../styles/common.module.scss';
 import styles from './post.module.scss';
@@ -59,6 +62,11 @@ export default function Post({ post }: PostProps) {
                 <FiUser />
                 {post.data.author}
               </span>
+
+              <span className={styles.readTime}>
+                <FiClock />
+                4 min
+              </span>
             </div>
           </section>
 
@@ -108,10 +116,8 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   })
   
   const post = {
-    first_publication_date: new Date(response.first_publication_date).toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric'
+    first_publication_date: format(new Date(response.first_publication_date), 'dd MMM yyyy', {
+      locale: ptBR,
     }),
     data: {
       title: data.title,

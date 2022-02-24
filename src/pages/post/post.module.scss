@@ -25,15 +25,17 @@
         .info {
             margin: 1rem 0;
             color: var(--colorFont-info);
+
+            svg {
+                margin-right: .5rem;
+            }
+        
+            span {
+                margin-right: 1rem;
+            }
         }
     
-        svg {
-            margin-right: .5rem;
-        }
-    
-        .createdAt {
-            margin-right: 1rem;
-        }
+
     }
     
     .contentBody {
