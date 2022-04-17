@@ -12,8 +12,17 @@
     }
 }
 
+.loading {
+    font-size: x-large;
+    color: var(--colorFont-title);
+}
+
 .content {
     padding: 3rem 5rem;
+
+    a {
+        color: var(--highlight);
+    }
 
     .contentHeader {
     

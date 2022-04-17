@@ -12,6 +12,7 @@ import ptBR from 'date-fns/locale/pt-BR';
 
 import commonStyles from '../../styles/common.module.scss';
 import styles from './post.module.scss';
+import { useRouter } from 'next/router';
 
 
 interface Post {
@@ -22,6 +23,7 @@ interface Post {
       url: string;
     };
     author: string;
+    average_reading_time: number;
     content: {
       heading: string;
       body: {
@@ -37,51 +39,86 @@ interface PostProps {
 
 
 export default function Post({ post }: PostProps) {
+  const article = formatPost(post);
+  const router = useRouter();
+
+
+  function formatPost(unformattedPosts: Post) {
+    return {
+      ...unformattedPosts,
+      first_publication_date: format(
+        new Date(unformattedPosts.first_publication_date),
+        "dd MMM' 'yyyy",
+        {
+          locale: ptBR,
+        }
+      ),
+      data: {
+        ...unformattedPosts.data,
+        average_reading_time: getAverageReadingTime(unformattedPosts),
+      },
+    };
+  }
+
+  function getAverageReadingTime(post: Post) {
+    return post.data.content.reduce((acc, content) => {
+      const textBody = RichText.asText(content.body).split(' ');
+      const number_words = textBody.length;
+
+      const readingTime = Math.ceil(number_words / 200);
+      return acc + readingTime;
+    }, 0);
+  }
+
+
   return (
     <>
       <Head>
-        <title>{post.data.title} | spaceTraveling</title>
+        <title>{article.data.title} | spaceTraveling</title>
       </Head>
 
-      <main>
-        <section className={styles.highlights}>
-          <img src={post.data.banner.url} alt="banner"></img>
-        </section>
-
-        <article className={`${styles.content} ${commonStyles.container}`}>
-          <section className={styles.contentHeader}>
-            <h1>{post.data.title}</h1>
-
-            <div className={styles.info}>
-              <span className={styles.createdAt}>
-                <FiCalendar />
-                {post.first_publication_date}
-              </span>
-
-              <span className={styles.author}>
-                <FiUser />
-                {post.data.author}
-              </span>
-
-              <span className={styles.readTime}>
-                <FiClock />
-                4 min
-              </span>
-            </div>
+      {router.isFallback
+        ? <p className={styles.loading}>Carregando...</p>
+        : <main>
+          <section className={styles.highlights}>
+            <img src={article.data.banner.url} alt="banner"></img>
           </section>
 
-          <section className={styles.contentBody}>
-            {post.data.content.map(content => {
-              return (
-                <div key={content.heading} >
-                  <h2>{content.heading}</h2>
-                  <div dangerouslySetInnerHTML={{ __html: content.body }} />
-                </div>
-              )
-            })}
-          </section>
-        </article>
-      </main>
+          <article className={`${styles.content} ${commonStyles.container}`}>
+            <section className={styles.contentHeader}>
+              <h1>{article.data.title}</h1>
+
+              <div className={styles.info}>
+                <span className={styles.createdAt}>
+                  <FiCalendar />
+                  {article.first_publication_date}
+                </span>
+
+                <span className={styles.author}>
+                  <FiUser />
+                  {article.data.author}
+                </span>
+
+                <span className={styles.readTime}>
+                  <FiClock />
+                  {article.data.average_reading_time} min
+                </span>
+              </div>
+            </section>
+
+            <section className={styles.contentBody}>
+              {article.data.content.map(content => {
+                return (
+                  <div key={content.heading} >
+                    <h2>{content.heading}</h2>
+                    <div dangerouslySetInnerHTML={{ __html: RichText.asHtml(content.body) }} />
+                  </div>
+                )
+              })}
+            </section>
+          </article>
+        </main>
+      }
     </>
   )
 }
@@ -106,26 +143,34 @@ export const getStaticPaths: GetStaticPaths = async () => {
 export const getStaticProps: GetStaticProps = async ({ params }) => {
   const prismic = getPrismicClient();
   const response = await prismic.getByUID('post', String(params.slug), {});
+
+  if (!response) {
+    return {
+      redirect: {
+        destination: '/',
+        permanent: false,
+      },
+    };
+  }
+
   const data = response.data;
 
-  const content = data.content.map(content => {
-    return {
-      heading: content.heading,
-      body: RichText.asHtml(content.body)
-    }
-  })
-  
   const post = {
-    first_publication_date: format(new Date(response.first_publication_date), 'dd MMM yyyy', {
-      locale: ptBR,
-    }),
+    uid: response.uid,
+    first_publication_date: response.first_publication_date,
     data: {
       title: data.title,
+      subtitle: data.subtitle,
       banner: {
         url: data.banner.url,
       },
       author: data.author,
-      content: content,
+      content: data.content.map(content => {
+        return {
+          heading: content.heading,
+          body: [...content.body],
+        };
+      }),
     },
   }
 

@@ -1,5 +1,5 @@
 import { MouseEvent, useState } from 'react';
-import { FiCalendar, FiClock, FiUser } from 'react-icons/fi';
+import { FiCalendar, FiUser } from 'react-icons/fi';
 
 import { GetStaticProps } from 'next';
 import Head from 'next/head';
@@ -37,13 +37,17 @@ interface HomeProps {
 
 export default function Home({ postsPagination }: HomeProps) {
 
-  const [posts, setPosts] = useState<Post[]>(postsPagination.results);
+  const [posts, setPosts] = useState<Post[]>(formatPosts(postsPagination.results));
   const [nextPage, setNextPage] = useState<string>(postsPagination.next_page);
 
 
   async function handleNextPage(event: MouseEvent) {
     event.preventDefault();
 
+    if (!nextPage) {
+      return;
+    }
+    
     await fetch(nextPage)
       .then(response => response.json())
       .then(data => updatePosts(data))
@@ -54,22 +58,25 @@ export default function Home({ postsPagination }: HomeProps) {
   }
 
   function updatePosts(data: PostPagination) {
-    const newPosts = data.results.map((post: Post) => {
+    const newPosts = formatPosts(data.results);
+    setPosts([...posts, ...newPosts]);
+    setNextPage(data.next_page);
+  }
+
+  function formatPosts(unformattedPosts: Post[]) {
+    const formattedPosts = unformattedPosts.map((post: Post) => {
       return {
-        uid: post.uid,
-        first_publication_date: format(new Date(post.first_publication_date), 'dd MMM yyyy', {
-          locale: ptBR,
-        }),
-        data: {
-          title: post.data.title,
-          subtitle: post.data.subtitle,
-          author: post.data.author
-        }
+        ...post,
+        first_publication_date: format(
+          new Date(post.first_publication_date), 
+          'dd MMM yyyy', 
+          {
+            locale: ptBR,
+          }),
       }
     });
 
-    setPosts([...posts, ...newPosts]);
-    setNextPage(data.next_page);
+    return formattedPosts;
   }
 
 
@@ -100,11 +107,6 @@ export default function Home({ postsPagination }: HomeProps) {
                   <FiUser />
                   {post.data.author}
                 </span>
-
-                <span className={styles.readTime}>
-                  <FiClock />
-                  4 min
-                </span>
               </div>
             </li>
           ))}
@@ -131,21 +133,19 @@ export const getStaticProps: GetStaticProps = async () => {
   const postsResponse = await prismic.query([
     Prismic.predicates.at('document.type', 'post')
   ], {
-    pageSize: 3,
+    pageSize: 2,
   });
 
   const posts = postsResponse.results.map(post => {
     return {
       uid: post.uid,
-      first_publication_date: format(new Date(post.first_publication_date), 'dd MMM yyyy', {
-        locale: ptBR,
-      }),
+      first_publication_date: post.first_publication_date,
       data: {
         title: post.data.title,
         subtitle: post.data.subtitle,
         author: post.data.author,
-      }
-    }
+      },
+    };
   });
 
   const postsPagination = {
@@ -156,6 +156,7 @@ export const getStaticProps: GetStaticProps = async () => {
   return {
     props: {
       postsPagination,
-    }
+    },
+    revalidate: 60 * 60 // 1 hours
   }
 }
